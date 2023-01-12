@@ -17,9 +17,6 @@ public class EnderecoService {
     private final EnderecoRepository repository;
     private final EnderecoMapper mapper;
 
-    /**
-     * • Listar Endereços da Pessoa - etapa 6 do desafio
-     * */
     public List<EnderecoDTO> listarPorIdPessoa(int idPessoa) {
         return mapper.toDto(repository.findAllByPessoaId(idPessoa));
     }

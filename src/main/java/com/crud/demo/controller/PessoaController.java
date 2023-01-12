@@ -3,16 +3,19 @@ package com.crud.demo.controller;
 import com.crud.demo.dto.EnderecoDTO;
 import com.crud.demo.dto.PessoaCadastroDTO;
 import com.crud.demo.dto.PessoaDTO;
+import com.crud.demo.dto.filtros.PessoaFiltro;
 import com.crud.demo.service.PessoaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDate;
 
 @Slf4j
 @RestController
@@ -29,9 +32,12 @@ public class PessoaController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<PessoaDTO>> listar(Pageable pageable) {
+    public ResponseEntity<Page<PessoaDTO>> listar(@RequestParam(required = false) String nome,
+                                                  @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dataNascimento,
+                                                  Pageable pageable) {
         log.info("listando pessoas");
-        return ResponseEntity.ok(service.listar(pageable));
+        PessoaFiltro filtro = new PessoaFiltro(nome, dataNascimento);
+        return ResponseEntity.ok(service.listar(filtro, pageable));
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)

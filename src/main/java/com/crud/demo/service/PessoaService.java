@@ -3,6 +3,7 @@ package com.crud.demo.service;
 import com.crud.demo.dto.EnderecoDTO;
 import com.crud.demo.dto.PessoaCadastroDTO;
 import com.crud.demo.dto.PessoaDTO;
+import com.crud.demo.dto.filtros.PessoaFiltro;
 import com.crud.demo.enums.StatusEndereco;
 import com.crud.demo.exceptions.HttpStatusException;
 import com.crud.demo.model.Pessoa;
@@ -26,17 +27,11 @@ public class PessoaService {
     private final PessoaRepository repository;
     private final PessoaMapper mapper;
 
-    /**
-     * •	Consultar uma pessoa - etapa 3 do desafio
-     * */
     public PessoaDTO obterPorId(int id) {
         Pessoa pessoa = repository.findById(id).orElseThrow(() -> new HttpStatusException("Pessoa com id " + id + " não encontrada", HttpStatus.NOT_FOUND));
         return mapper.toDto(pessoa);
     }
 
-    /**
-     * •	Criar uma Pessoa - etapa  do desafio
-     * */
     public PessoaDTO cadastrar(PessoaCadastroDTO cadastroDTO) {
         //a pessoa precisa se cadastrar com um endereço
         cadastroDTO.getEndereco().setStatusEndereco(StatusEndereco.PRINCIPAL);
@@ -51,17 +46,14 @@ public class PessoaService {
         return pessoaDTO;
     }
 
-    /**
-     * •	Listar - etapa 4 do desafio
-     * */
-    public Page<PessoaDTO> listar(Pageable pageable) {
-        Page<Pessoa> page = repository.findAll(pageable);
-        List<PessoaDTO> listaDTO = mapper.toDto(repository.findAll());
+    public Page<PessoaDTO> listar(PessoaFiltro filtro, Pageable pageable) {
+        Page<Pessoa> page = repository.listarPorFiltro(filtro, pageable);
+        List<PessoaDTO> listaDTO = mapper.toDto(page.getContent());
         return new PageImpl<>(listaDTO, pageable, page.getTotalElements());
     }
 
     /**
-     * •	Criar  endereço para uma Pessoa - etapa 5 do desafio
+     * Criar endereço para uma Pessoa - etapa 5 do desafio
      * */
     public PessoaDTO adicionarEndereco(int id, EnderecoDTO enderecoDTO) {
         PessoaDTO pessoaDTO = obterPorId(id);
@@ -73,7 +65,7 @@ public class PessoaService {
     }
 
     /**
-     * •	Informar endereço principal - etapa 7 do desafio
+     * Informar endereço principal - etapa 7 do desafio
      * */
     public void mudarStatusEndereco(int idPessoa, int idEndereco) {
         var pessoaDTO = obterPorId(idPessoa);
@@ -85,15 +77,12 @@ public class PessoaService {
         salvar(mapper.toEntity(pessoaDTO));
     }
 
-    /**
-     * •	Editar Pessoa - etapa 2 do desafio
-     * */
     public PessoaDTO atualizar(PessoaDTO dto) {
         obterPorId(dto.getId()); // garantir que existe
         Pessoa pessoa = salvar(mapper.toEntity(dto));
         return mapper.toDto(pessoa);
     }
-    
+
     public void excluirPorId(int id) {
         repository.deleteById(id);
     }
